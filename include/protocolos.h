@@ -11,3 +11,4 @@ void looger(void);
 void func(int);
 void set_func_sig(__sighandler_t);
 void sigHandler(int);
+pid_t fork_con_errno(void);

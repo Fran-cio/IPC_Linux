@@ -19,6 +19,15 @@ long *ratio;
 
 struct timeval stop, start;
 
+pid_t fork_con_errno(void){
+	pid_t fd = fork();
+	if(fd == -1){
+		perror("Fallo en el fork");
+		exit(EXIT_FAILURE);
+	}
+	return fd;
+}
+
 void gestion_de_los_mensajes(int fd_socket,int fd_socket_nuevo){
 		close( fd_socket );
 		while ( 1 )
@@ -57,7 +66,7 @@ void recibir_mensajes(struct sockaddr* direccion_cli){
 		fd_socket_nuevo = accept( fd_socket, 
 				direccion_cli, (unsigned int*)&long_cli );
 
-		int pid = fork();
+		int pid = fork_con_errno();
 		if (pid == 0) {
 			gestion_de_los_mensajes(fd_socket,fd_socket_nuevo);
 		}
