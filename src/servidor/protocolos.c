@@ -5,7 +5,7 @@
 #include <sys/shm.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include "../include/estructura_protocolo.h"
+#include "../../include/servidor/estructura_protocolo.h"
 #include "./manejo_del_server.c"
 
 int puerto
@@ -15,10 +15,16 @@ Protocolos *estrucura_prot;
 
 int socket_perror(int __domain, int __type, int __protocol){
 	int fd_s = socket( __domain, __type, __protocol);
+	int flag = 1;
 
 	if(fd_s <0){
 		perror("Socket Error");
-		exit(1);
+		exit(EXIT_FAILURE);
+	}
+
+	if(setsockopt(fd_s, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag)) == -1) {
+		perror("Setsockopt error");
+		exit(EXIT_FAILURE);
 	}
 
 	return fd_s;
@@ -54,7 +60,7 @@ void protocolo_ipv4(char* argv){
 
 	protocolo = "Ipv4";
 	ratio = &estrucura_prot->ipv4;
-
+	
 	memset( (char *) &direccion_serv_ipv4, 0, sizeof(direccion_serv_ipv4) );
 	short unsigned int puerto = (short unsigned int)atoi( argv );
 	direccion_serv_ipv4.sin_family = AF_INET;
@@ -112,7 +118,7 @@ void protocolo_unix(char * argv){
 	struct sockaddr_un direccion_serv_unix, direccion_cli_unix;
 	char* path;
 
-	path = malloc(sizeof(argv)+sizeof("./ipc/")+1);
+	path = malloc((strlen(argv)+strlen("./ipc/")+1)*sizeof(char));
 	protocolo = "unix";
 	ratio = &estrucura_prot->uni;
 
@@ -147,17 +153,17 @@ void looger(void){
 		exit(EXIT_FAILURE);
 	}
 	char* formato = "\r===========================================================\n\
-										\ripv4: %lu b/s\n\
-										\ripv6: %lu b/s\n\
-										\runix: %lu b/s\n\
-										\rtotal:%lu b/s\n\
-										\r===========================================================\n";
-								
+									 \ripv4: %lu b/s\n\
+									 \ripv6: %lu b/s\n\
+									 \runix: %lu b/s\n\
+									 \rtotal:%lu b/s\n\
+									 \r===========================================================\n";
+
 	char* texto = malloc(strlen(formato)*sizeof(char));
 	while ( esta_corriendo ) {
 		sprintf(texto,formato
-					,estrucura_prot->ipv4, estrucura_prot->ipv6, estrucura_prot->uni,
-					estrucura_prot->ipv4 + estrucura_prot->ipv6 + estrucura_prot->uni);
+				,estrucura_prot->ipv4, estrucura_prot->ipv6, estrucura_prot->uni,
+				estrucura_prot->ipv4 + estrucura_prot->ipv6 + estrucura_prot->uni);
 
 		fwrite(texto, sizeof(char), strlen(texto), log);	
 		sleep(5);

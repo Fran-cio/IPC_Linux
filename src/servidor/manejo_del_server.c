@@ -8,10 +8,9 @@
 int	fd_socket
 		,fd_socket_nuevo;
 
-long unsigned int long_buffer;
-
-long unsigned int long_serv
-							,long_cli;
+long unsigned int long_buffer,
+		 					long_serv,
+							long_cli;
 
 char *protocolo;
 
@@ -29,34 +28,28 @@ pid_t fork_con_errno(void){
 }
 
 void gestion_de_los_mensajes(int fd_socket,int fd_socket_nuevo){
-		close( fd_socket );
-		while ( 1 )
-		{
-			char buffer[long_buffer];
-			memset( buffer, 0, long_buffer );
+	long int n;
+	close( fd_socket );
 
-			gettimeofday(&start, NULL);
-			long int n = read( fd_socket_nuevo, buffer, long_buffer-1 );
-			if ( n < 0 ) {
-				perror( "lectura de socket" );
-				exit(1);
-			}
-			gettimeofday(&stop, NULL);
-			long time_us=(stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec;
-			*ratio = 1000000*(n-1)/time_us;
-			n = write( fd_socket_nuevo, "Obtuve su mensaje", 18 );
-			if ( n < 0 ) {
-				perror( "escritura en socket" );
-				exit( 1 );
-			}
-			// Verificación de si hay que terminar
-			buffer[strlen(buffer)-1] = '\0';
-			if( !strcmp( "fin", buffer ) ) {
-				printf( "PROCESO %d. Como recibí 'fin', termino la ejecución.\n\n", 
-						getpid() );
-				exit(0);
-			}
+	char buffer[long_buffer];
+	while ( 1 )
+	{
+		gettimeofday(&start, NULL);
+		n = recv( fd_socket_nuevo, buffer, strlen(buffer),MSG_DONTWAIT);
+		if ( n < 0 ) {
+			perror( "lectura de socket" );
+			break;
 		}
+		else if (n == 0) {
+			close(fd_socket_nuevo);
+			printf( "PROCESO %d. termino la ejecución.\n\n", 
+					getpid() );
+			break;
+		}
+		gettimeofday(&stop, NULL);
+		long time_us=(stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec;
+		*ratio = 1000000*(n-1)/time_us;
+	}
 }
 
 void recibir_mensajes(struct sockaddr* direccion_cli){
@@ -69,6 +62,7 @@ void recibir_mensajes(struct sockaddr* direccion_cli){
 		int pid = fork_con_errno();
 		if (pid == 0) {
 			gestion_de_los_mensajes(fd_socket,fd_socket_nuevo);
+			break;
 		}
 		else {
 			printf( "SERVIDOR: Nuevo cliente %s, que atiende el proceso hijo: %d\n", protocolo,pid);
