@@ -39,6 +39,7 @@ void unix_cli(char* archivo) {
 	char *path;
 
 	path = malloc((strlen(archivo)+strlen("./ipc/")+1)*sizeof(char));
+
 	path = strcpy(path, "./ipc/");
 	path = strcat(path, archivo);
 

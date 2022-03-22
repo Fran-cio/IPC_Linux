@@ -21,12 +21,14 @@ cliente_gdb: $(PATHbin)cliente_gdb
 $(PATHbin)cliente_gdb: $(PATHreccli)cliente.c $(PATHreccli)manejo_del_cliente.c $(PATHreccli)protocolos_cli.c
 	mkdir -p $(PATHbin)
 	$(CC) $(CFLAGS_gdb) -o $(PATHbin)cliente_gdb $(PATHreccli)cliente.c 
-server: $(PATHbin)server
+	
+server_gdb: $(PATHbin)server_gdb
 
-
-main_gdb: $(PATHrecser)server.c $(PATHrecser)protocolos.c 
+$(PATHbin)server_gdb: $(PATHrecser)server.c $(PATHrecser)manejo_del_server.c $(PATHrecser)protocolos.c
 	mkdir -p $(PATHbin)
-	$(CC) $(CFLAGS) -o $(PATHbin)main_gdb main.c $(PATHrecser)funciones.c -g
+	$(CC) $(CFLAGS_gdb) -o $(PATHbin)server_gdb $(PATHrecser)server.c $(PATHrecser)protocolos.c $(PATHrec)signals.c 
+
+server: $(PATHbin)server
 	
 $(PATHbin)server: $(PATHout)server.o $(PATHlib)lib_ser.a 
 	mkdir -p $(PATHbin) ./log ./ipc 

@@ -18,8 +18,7 @@ void mensajes_cli(void){
 		buffer[i] = (char)rand();
 	}
 	while(1) {			 
-		printf("%s\n",buffer);
-		n = send( sockfd, buffer, strlen(buffer),0 );
+		n = send( sockfd, buffer, tam_buffer,0 );
 		if ( n < 0 ) {
 			perror( "escritura de socket" );
 			close(sockfd);

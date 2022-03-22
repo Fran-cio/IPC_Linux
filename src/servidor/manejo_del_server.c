@@ -1,8 +1,10 @@
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/prctl.h>
 #include <unistd.h>
 
 int	fd_socket
@@ -34,8 +36,8 @@ void gestion_de_los_mensajes(int fd_socket,int fd_socket_nuevo){
 	char buffer[long_buffer];
 	while ( 1 )
 	{
-		gettimeofday(&start, NULL);
-		n = recv( fd_socket_nuevo, buffer, strlen(buffer),MSG_DONTWAIT);
+		memset(buffer, '\0', long_buffer);
+		n = recv( fd_socket_nuevo, buffer, long_buffer,0);
 		if ( n < 0 ) {
 			perror( "lectura de socket" );
 			break;
@@ -44,11 +46,10 @@ void gestion_de_los_mensajes(int fd_socket,int fd_socket_nuevo){
 			close(fd_socket_nuevo);
 			printf( "PROCESO %d. termino la ejecución.\n\n", 
 					getpid() );
+			*ratio = 0;
 			break;
 		}
-		gettimeofday(&stop, NULL);
-		long time_us=(stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec;
-		*ratio = 1000000*(n-1)/time_us;
+		*ratio += n;
 	}
 }
 
@@ -61,6 +62,7 @@ void recibir_mensajes(struct sockaddr* direccion_cli){
 
 		int pid = fork_con_errno();
 		if (pid == 0) {
+			prctl(PR_SET_PDEATHSIG, SIGTERM);
 			gestion_de_los_mensajes(fd_socket,fd_socket_nuevo);
 			break;
 		}

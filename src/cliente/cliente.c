@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "./protocolos_cli.c"
 
@@ -13,13 +13,13 @@ int main( int argc, char *argv[] ){
 	
 	iniciar_variables_globales((long unsigned int)atoll(argv[2]));
 
-	if (!strcmp(argv[1], "ipv4") & (argc<6)) {
+	if (!strcmp(argv[1], "ipv4") & (argc ==5 )) {
 		ipv4_cli(argv[3], (short unsigned int)atoi(argv[4]));
 	}
-	else if (!strcmp(argv[1], "ipv6")&(argc<7)) {
+	else if (!strcmp(argv[1], "ipv6")&(argc == 5)) {
 		ipv6_cli(argv[3], (short unsigned int)atoi(argv[4]));
 	}
-	else if (!strcmp(argv[1], "unix")) {
+	else if ((!strcmp(argv[1], "unix") & (argc == 4))) {
 		unix_cli(argv[3]);
 	}
 	else {
@@ -29,8 +29,9 @@ int main( int argc, char *argv[] ){
 }
 
 void salida_error(char *argv){
-	fprintf( stderr, "\rIngrese: %s <protocolo> <tamaño de buffer> <puerto> Si es por internet\n\
+	fprintf( stderr, "\n\
+			\rIngrese:\n\
+			\r%s <protocolo> <tamaño de buffer> <ip> <puerto> Si es por internet\n\
 			\r%s <protocolo> <tamaño de buffer> <archivo> si es por unix", argv,argv );
 	exit( EXIT_FAILURE );
-
 }

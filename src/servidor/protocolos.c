@@ -1,7 +1,9 @@
 #include <netinet/in.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/prctl.h>
 #include <sys/shm.h>
 #include <sys/un.h>
 #include <unistd.h>
@@ -50,6 +52,7 @@ void iniciar_variables_globales(long unsigned int tam_buffer){
 		fprintf(stderr, "Tamaño de buffer invalido: %lu", tam_buffer);
 	}
 	long_buffer = tam_buffer;
+	prctl(PR_SET_PDEATHSIG, SIGTERM);
 	asignar_segmento();
 }
 
@@ -118,12 +121,13 @@ void protocolo_unix(char * argv){
 	struct sockaddr_un direccion_serv_unix, direccion_cli_unix;
 	char* path;
 
-	path = malloc((strlen(argv)+strlen("./ipc/")+1)*sizeof(char));
 	protocolo = "unix";
 	ratio = &estrucura_prot->uni;
 
 	fd_socket = socket_perror(AF_UNIX, SOCK_STREAM, 0);
-	path = strcat(path, "./ipc/");
+
+	path = malloc((strlen(argv)+strlen("./ipc/")+1)*sizeof(char));
+	path = strcpy(path, "./ipc/");
 	path = strcat(path, argv);
 
 	unlink(path);
@@ -145,6 +149,10 @@ void protocolo_unix(char * argv){
 }
 
 void looger(void){
+	long ipv4,
+			 ipv6,
+			 uni,
+			 total;
 	esta_corriendo=1;
 	FILE* log;
 	log = fopen("./log/log.txt", "w");
@@ -153,22 +161,27 @@ void looger(void){
 		exit(EXIT_FAILURE);
 	}
 	char* formato = "\r===========================================================\n\
-									 \ripv4: %lu b/s\n\
-									 \ripv6: %lu b/s\n\
-									 \runix: %lu b/s\n\
-									 \rtotal:%lu b/s\n\
+									 \ripv4: %lu Byte/s\n\
+									 \ripv6: %lu Byte/s\n\
+									 \runix: %lu Byte/s\n\
+									 \rtotal:%lu Byte/s\n\
 									 \r===========================================================\n";
 
-	char* texto = malloc(strlen(formato)*sizeof(char));
 	while ( esta_corriendo ) {
-		sprintf(texto,formato
-				,estrucura_prot->ipv4, estrucura_prot->ipv6, estrucura_prot->uni,
-				estrucura_prot->ipv4 + estrucura_prot->ipv6 + estrucura_prot->uni);
-
-		fwrite(texto, sizeof(char), strlen(texto), log);	
-		sleep(5);
+		ipv4 = estrucura_prot->ipv4;
+		ipv6 = estrucura_prot->ipv6;
+		uni = estrucura_prot->uni;
+		
+		total = ipv4 + ipv6 +uni;
+		printf(formato,ipv4, ipv6, uni, total);
+		fprintf(log,formato,ipv4, ipv6, uni, total);
+		
+		estrucura_prot->ipv4 = 0;
+		estrucura_prot->ipv6 = 0;
+		estrucura_prot->uni = 0; 
+		
+		sleep(1);
 	}
-	free(texto);
 	fclose(log);
 }
 

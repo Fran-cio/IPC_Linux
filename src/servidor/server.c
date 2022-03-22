@@ -7,7 +7,9 @@
 int main( int argc, char *argv[] ) {
 	int pid_prot;
 	if ( argc < 5 ) {
-		fprintf( stderr, "Ingrese: %s <archivo> <puerto ipv4> <puerto ipv6> <tamaño de buffer>\n", argv[0] );
+		fprintf( stderr, 
+				"Ingrese: %s <archivo> <puerto ipv4> <puerto ipv6> <tamaño de buffer>\n",
+				argv[0] );
 		exit( EXIT_FAILURE );
 	}
 
