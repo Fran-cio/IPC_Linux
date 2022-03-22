@@ -29,6 +29,11 @@ pid_t fork_con_errno(void){
 	return fd;
 }
 
+/*
+ * Los mensajes se almacenan en un buffer con el tamaño pasado como parametro
+ * posteriorente se lee el mensaje, si todo salio bien, la cantidad de datos
+ * guardados se suman a la de cada protocolo
+ */
 void gestion_de_los_mensajes(int fd_socket,int fd_socket_nuevo){
 	long int n;
 	close( fd_socket );
@@ -46,19 +51,21 @@ void gestion_de_los_mensajes(int fd_socket,int fd_socket_nuevo){
 			close(fd_socket_nuevo);
 			printf( "PROCESO %d. termino la ejecución.\n\n", 
 					getpid() );
-			*ratio = 0;
 			break;
 		}
 		*ratio += n;
 	}
 }
-
+/*
+ * Cada vez que un cliente conecte, la funcion accept deriva este socket a un
+ * proceso hijo
+ */
 void recibir_mensajes(struct sockaddr* direccion_cli){
 	listen( fd_socket, 5 );
 	long_cli = sizeof( *direccion_cli);
 	while ( 1 ) {
-		fd_socket_nuevo = accept( fd_socket, 
-				direccion_cli, (unsigned int*)&long_cli );
+		fd_socket_nuevo = accept( fd_socket, direccion_cli,
+				(unsigned int*)&long_cli );
 
 		int pid = fork_con_errno();
 		if (pid == 0) {

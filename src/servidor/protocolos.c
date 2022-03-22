@@ -35,6 +35,10 @@ int socket_perror(int __domain, int __type, int __protocol){
 void asignar_segmento(void){
 	int memoria_compartida = shmget(ftok("../ipc", 'S'),sizeof(*estrucura_prot),
 			(IPC_CREAT | 0660));
+	/*
+	 * Se opto por una estructura de memoria compartida donde cada protocolo
+	 * va a estar modificando su espacio de memoria asociado
+	 */
 	if(memoria_compartida < 0){
 		perror("memoria_compartida fallo");
 		exit(EXIT_FAILURE);
@@ -56,6 +60,10 @@ void iniciar_variables_globales(long unsigned int tam_buffer){
 	asignar_segmento();
 }
 
+/*
+ * En cada protocolo se llenan los valores correspondientes dentro de la 
+ * estructura y se bindea, posteriormente se va al manejo de los mensajes
+ */
 void protocolo_ipv4(char* argv){
 	struct sockaddr_in direccion_serv_ipv4, direccion_cli_ipv4;
 
@@ -126,6 +134,10 @@ void protocolo_unix(char * argv){
 
 	fd_socket = socket_perror(AF_UNIX, SOCK_STREAM, 0);
 
+	/*
+	 * La unica diferencia con los otros protocolos es que aca especificamos
+	 * el path en el cual se va a guardar el ipc asociado al socket
+	 */
 	path = malloc((strlen(argv)+strlen("./ipc/")+1)*sizeof(char));
 	path = strcpy(path, "./ipc/");
 	path = strcat(path, argv);
@@ -148,11 +160,16 @@ void protocolo_unix(char * argv){
 	recibir_mensajes((struct sockaddr*) &direccion_cli_unix);	
 }
 
+/*
+ * Esta funcion muestrea cada valor de la estrutura y hace los calculos para
+ * logearlos. Posteriormente se resetean los valores
+ */
 void looger(void){
 	long ipv4,
 			 ipv6,
 			 uni,
 			 total;
+
 	esta_corriendo=1;
 	FILE* log;
 	log = fopen("./log/log.txt", "w");
@@ -173,7 +190,6 @@ void looger(void){
 		uni = estrucura_prot->uni;
 		
 		total = ipv4 + ipv6 +uni;
-		printf(formato,ipv4, ipv6, uni, total);
 		fprintf(log,formato,ipv4, ipv6, uni, total);
 		
 		estrucura_prot->ipv4 = 0;

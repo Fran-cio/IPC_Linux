@@ -10,6 +10,10 @@ int main( int argc, char *argv[] ){
 	if ( argc < 3 ) {
 		salida_error(argv[0]);
 	}
+	/*
+	 * Segun los parametros de entrada se decide que protocolo usara el cliente
+	 * con sus respectivos parametros asociados
+	 */
 	
 	iniciar_variables_globales((long unsigned int)atoll(argv[2]));
 
