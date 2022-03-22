@@ -39,7 +39,7 @@ void unix_cli(char* archivo) {
 	char *path;
 
 	path = malloc((strlen(archivo)+strlen("./ipc/")+1)*sizeof(char));
-	path = strcat(path, "./ipc/");
+	path = strcpy(path, "./ipc/");
 	path = strcat(path, archivo);
 
 	memset( (char *)&serv_addr, '\0', sizeof(serv_addr) );
