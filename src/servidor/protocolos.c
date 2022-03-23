@@ -178,23 +178,28 @@ void looger(void){
 		exit(EXIT_FAILURE);
 	}
 	char* formato = "\r===========================================================\n\
-									 \ripv4: %lu Byte/s\n\
-									 \ripv6: %lu Byte/s\n\
-									 \runix: %lu Byte/s\n\
-									 \rtotal:%lu Byte/s\n\
+									 \ripv4: %lu MB/s\n\
+									 \ripv6: %lu MB/s\n\
+									 \runix: %lu MB/s\n\
+									 \rtotal:%lu MB/s\n\
 									 \r===========================================================\n";
 
 	while ( esta_corriendo ) {
-		ipv4 = estrucura_prot->ipv4;
-		ipv6 = estrucura_prot->ipv6;
-		uni = estrucura_prot->uni;
+		ipv4 = estrucura_prot->ipv4/1000000;
+		ipv6 = estrucura_prot->ipv6/1000000;
+		uni = estrucura_prot->uni/1000000;
 		
 		total = ipv4 + ipv6 +uni;
 		fprintf(log,formato,ipv4, ipv6, uni, total);
+
+		//si se quiere ver en consola
+		/*printf(formato,ipv4, ipv6, uni, total);*/ 
 		
 		estrucura_prot->ipv4 = 0;
 		estrucura_prot->ipv6 = 0;
 		estrucura_prot->uni = 0; 
+
+		fflush(log);
 		
 		sleep(1);
 	}

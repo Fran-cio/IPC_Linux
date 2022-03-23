@@ -9,6 +9,8 @@ PATHout=./out/
 PATHlib=./lib/
 PATHbin=./bin/
 
+all: cliente server
+
 cliente: $(PATHbin)cliente
 
 $(PATHbin)cliente: $(PATHout)cliente.o $(PATHlib)lib_cli.a 

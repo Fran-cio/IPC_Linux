@@ -31,7 +31,7 @@ void iniciar_variables_globales(long unsigned int tamanio_buffer){
 	if (tamanio_buffer == 0) {
 		fprintf(stderr, "Tamaño de buffer invalido: %lu", tamanio_buffer);
 	}
-	tam_buffer = tamanio_buffer;	
+	long_buffer = tamanio_buffer;	
 }
 
 void unix_cli(char* archivo) {

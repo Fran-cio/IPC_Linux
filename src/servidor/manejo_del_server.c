@@ -35,25 +35,25 @@ pid_t fork_con_errno(void){
  * guardados se suman a la de cada protocolo
  */
 void gestion_de_los_mensajes(int fd_socket,int fd_socket_nuevo){
-	long int n;
+	long int cantidad_de_bits;
 	close( fd_socket );
 
 	char buffer[long_buffer];
 	while ( 1 )
 	{
 		memset(buffer, '\0', long_buffer);
-		n = recv( fd_socket_nuevo, buffer, long_buffer,0);
-		if ( n < 0 ) {
+		cantidad_de_bits = recv( fd_socket_nuevo, buffer, long_buffer,0);
+		if ( cantidad_de_bits < 0 ) {
 			perror( "lectura de socket" );
 			break;
 		}
-		else if (n == 0) {
+		else if (cantidad_de_bits == 0) {
 			close(fd_socket_nuevo);
 			printf( "PROCESO %d. termino la ejecución.\n\n", 
 					getpid() );
 			break;
 		}
-		*ratio += n;
+		*ratio += cantidad_de_bits;
 	}
 }
 /*
