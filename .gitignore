@@ -1,0 +1,10 @@
+*.ini
+*.o
+*.out
+*.a
+server
+cliente
+*.txt
+node_modules
+*.json
+.husky
