@@ -36,9 +36,7 @@ int socket_perror(int __domain, int __type, int __protocol){
 }
 
 void asignar_segmento(void){
-	/*int memoria_compartida = shmget(ftok("../ipc", 'S'),sizeof(*estrucura_prot),*/
-			/*(IPC_CREAT | 0660));*/
-	estrucura_prot = (Protocolos *)mmap(NULL, sizeof(unsigned long long int), 
+	estrucura_prot = (Protocolos *)mmap(NULL, sizeof(Protocolos), 
 								PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 	/*
 	 * Se opto por una estructura de memoria compartida donde cada protocolo
