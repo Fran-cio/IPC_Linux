@@ -37,20 +37,36 @@ pid_t fork_con_errno(void){
  * posteriorente se lee el mensaje, si todo salio bien, la cantidad de datos
  * guardados se suman a la de cada protocolo
  */
-void gestion_de_los_mensajes(int fd_socket,int fd_socket_nuevo){
+void gestion_de_los_mensajes(int fd_socket,int fd_socket_nuevo)
+{
 	long int cantidad_de_bits;
 	close( fd_socket );
 
 	char buffer[long_buffer];
+
+	memset(buffer, '\0', long_buffer);
+	sprintf(buffer, "%lu", long_buffer);
+
+	cantidad_de_bits = send(fd_socket_nuevo, buffer, long_buffer, 0);
+
+	if ( cantidad_de_bits < 0 ) {
+		perror( "fallo en handshake" );
+		return;	
+	}
+	else if (cantidad_de_bits == 0) {
+		close(fd_socket_nuevo);
+		printf( "PROCESO %d. termino la ejecución.\n\n", 
+				getpid() );
+		return;
+	}
+
 	while ( 1 )
 	{
 		memset(buffer, '\0', long_buffer);
+
 		cantidad_de_bits = recv( fd_socket_nuevo, buffer, long_buffer,0);
-		if ( cantidad_de_bits < 0 ) {
-			perror( "lectura de socket" );
-			break;
-		}
-		else if (cantidad_de_bits == 0) {
+
+		if (cantidad_de_bits <= 0) {
 			close(fd_socket_nuevo);
 			printf( "PROCESO %d. termino la ejecución.\n\n", 
 					getpid() );
