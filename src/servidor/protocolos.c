@@ -1,11 +1,7 @@
 #include <netinet/in.h>
-#include <fcntl.h>
 #include <semaphore.h>
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <sys/prctl.h>
 #include <sys/shm.h>
 #include <sys/un.h>
@@ -63,6 +59,7 @@ void iniciar_variables_globales(long unsigned int tam_buffer){
 	prctl(PR_SET_PDEATHSIG, SIGTERM);
 	asignar_segmento();
 	iniciar_semaforo();
+	generarbasededatos();
 }
 
 /*

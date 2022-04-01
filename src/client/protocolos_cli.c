@@ -73,6 +73,7 @@ void ipv4_cli(char* host,short unsigned int puerto){
 		perror( "conexión" );
 		exit( EXIT_FAILURE );
 	}	
+	funcion = &cliente_A;
 	mensajes_cli();
 }
 
