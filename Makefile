@@ -25,15 +25,15 @@ $(PATHbin)cliente_gdb: $(PATHreccli)cliente.c $(PATHreccli)manejo_del_cliente.c 
 	
 server_gdb: $(PATHbin)server_gdb
 
-$(PATHbin)server_gdb: $(PATHrecser)server.c $(PATHrecser)manejo_del_server.c $(PATHrecser)protocolos.c
+$(PATHbin)server_gdb: $(PATHrecser)server.c $(PATHrecser)manejo_del_server.c $(PATHrecser)protocolos.c $(PATHrecser)base_de_datos.c
 	mkdir -p $(PATHbin)
-	$(CC) $(CFLAGS_gdb) -o $(PATHbin)server_gdb $(PATHrecser)server.c $(PATHrecser)protocolos.c $(PATHrec)signals.c 
+	$(CC) $(CFLAGS_gdb) -o $(PATHbin)server_gdb $(PATHrecser)server.c $(PATHrecser)protocolos.c $(PATHrec)signals.c -lsqlite3 
 
 server: $(PATHbin)server
 	
 $(PATHbin)server: $(PATHout)server.o $(PATHlib)lib_ser.a 
 	mkdir -p $(PATHbin) ./log ./ipc 
-	$(CC) $(CFLAGS) -o $(PATHbin)server $(PATHout)server.o -L$(PATHlib) -l_ser
+	$(CC) $(CFLAGS) -o $(PATHbin)server $(PATHout)server.o -lsqlite3 -L$(PATHlib) -l_ser
 	
 $(PATHlib)lib_ser.a: $(PATHout)protocolos.o $(PATHout)signals.o 
 	mkdir -p $(PATHlib) 
@@ -48,9 +48,9 @@ $(PATHout)server.o: $(PATHrecser)server.c
 	$(CC) $(CFLAGS) -c $(PATHrecser)server.c
 	mv ./server.o $(PATHout)/server.o
 
-$(PATHout)protocolos.o: $(PATHrecser)protocolos.c $(PATHrecser)manejo_del_server.c   
+$(PATHout)protocolos.o: $(PATHrecser)protocolos.c $(PATHrecser)manejo_del_server.c $(PATHrecser)base_de_datos.c   
 	mkdir -p $(PATHout)
-	$(CC) $(CFLAGS) -c $(PATHrecser)protocolos.c 
+	$(CC) $(CFLAGS) -c $(PATHrecser)protocolos.c -lsqlite3 -std=gnu99
 	mv ./protocolos.o $(PATHout)
 
 $(PATHout)cliente.o: $(PATHreccli)cliente.c
@@ -58,13 +58,17 @@ $(PATHout)cliente.o: $(PATHreccli)cliente.c
 	$(CC) $(CFLAGS) -c $(PATHreccli)cliente.c 
 	mv ./cliente.o $(PATHout)
 
-$(PATHout)protocolos_cli.o: $(PATHreccli)protocolos_cli.c $(PATHreccli)manejo_del_cliente.c   
+$(PATHout)protocolos_cli.o: $(PATHreccli)protocolos_cli.c $(PATHreccli)manejo_del_cliente.c   $(PATHrecser)base_de_datos.c
 	mkdir -p $(PATHout)
 	$(CC) $(CFLAGS) -c $(PATHreccli)protocolos_cli.c 
 	mv ./protocolos_cli.o $(PATHout)
 
-
 $(PATHout)signals.o: $(PATHrec)signals.c  
+	mkdir -p $(PATHout)
+	$(CC) $(CFLAGS) -c $(PATHrec)signals.c 
+	mv ./signals.o $(PATHout)
+
+$(PATHout)sqlite3.o: $(PATHrec)sqlite3.c  
 	mkdir -p $(PATHout)
 	$(CC) $(CFLAGS) -c $(PATHrec)signals.c 
 	mv ./signals.o $(PATHout)
