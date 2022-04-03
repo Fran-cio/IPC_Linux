@@ -9,13 +9,13 @@ PATHout=./out/
 PATHlib=./lib/
 PATHbin=./bin/
 
-all: cliente server
+all: client server
 
-cliente: $(PATHbin)cliente
+client: $(PATHbin)client
 
-$(PATHbin)cliente: $(PATHout)cliente.o $(PATHlib)lib_cli.a 
+$(PATHbin)client: $(PATHout)cliente.o $(PATHlib)lib_cli.a 
 	mkdir -p $(PATHbin)
-	$(CC) $(CFLAGS) -o $(PATHbin)cliente $(PATHout)cliente.o -L$(PATHlib) -l_cli
+	$(CC) $(CFLAGS) -o $(PATHbin)client $(PATHout)cliente.o -L$(PATHlib) -l_cli
 
 cliente_gdb: $(PATHbin)cliente_gdb
 

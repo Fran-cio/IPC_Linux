@@ -9,6 +9,9 @@
 #include <sys/time.h>
 #include <sys/prctl.h>
 #include <unistd.h>
+#include<time.h>
+
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 int	fd_socket
 		,fd_socket_nuevo;
@@ -18,6 +21,7 @@ long unsigned int long_buffer,
 							long_cli;
 
 char *protocolo, *mensaje;
+char tipo[1];	
 
 long *ratio;
 
@@ -27,6 +31,12 @@ struct timeval stop, start;
 
 int callback(void *NotUsed, int argc, char **argv, char **azColName);
 int rutina_sql(char* buffer);
+void handshake(long unsigned int , char[]);
+void logear_en_db();
+void para_Cliente_AB();
+void para_Cliente_C();
+long unsigned generar_hash_5381(char* ruta);
+
 
 pid_t fork_con_errno(void){
 	pid_t fd = fork();
@@ -42,48 +52,21 @@ pid_t fork_con_errno(void){
  * posteriorente se lee el mensaje, si todo salio bien, la cantidad de datos
  * guardados se suman a la de cada protocolo
  */
-void gestion_de_los_mensajes(int fd_socket,int fd_socket_nuevo)
+void gestion_de_los_mensajes()
 {
-	long int cantidad_de_bits;
 	close( fd_socket );
 
-	char buffer[long_buffer];
+	handshake(long_buffer, tipo);
 
-	memset(buffer, '\0', long_buffer);
-	sprintf(buffer, "%lu", long_buffer);
+	printf("El tipo de cliente conectado es: %s\n",tipo);
 
-	cantidad_de_bits = send(fd_socket_nuevo, buffer, strlen(buffer), 0);
-
-	if ( cantidad_de_bits < 0 ) {
-		perror( "fallo en handshake" );
-		return;	
-	}
-	else if (cantidad_de_bits == 0) {
-		close(fd_socket_nuevo);
-		printf( "PROCESO %d. termino la ejecución.\n\n", 
-				getpid() );
-		return;
-	}
-	while ( 1 )
+	if (tipo[0] == 'C') 
 	{
-		memset(buffer, '\0', long_buffer);
-
-		cantidad_de_bits = recv( fd_socket_nuevo, buffer, long_buffer,0);
-
-		if (cantidad_de_bits <= 0) {
-			close(fd_socket_nuevo);
-			printf( "PROCESO %d. termino la ejecución.\n\n", 
-					getpid() );
-			break;
-		}
-
-		printf("%s\n",buffer);
-
-		rutina_sql(buffer);
-
-		sem_wait(*semaforo);
-		*ratio += cantidad_de_bits;
-		sem_post(*semaforo);
+		para_Cliente_C();
+	}
+	else
+	{
+		para_Cliente_AB();
 	}
 }
 /*
@@ -101,7 +84,7 @@ void recibir_mensajes(struct sockaddr* direccion_cli)
 		int pid = fork_con_errno();
 		if (pid == 0) {
 			prctl(PR_SET_PDEATHSIG, SIGTERM);
-			gestion_de_los_mensajes(fd_socket,fd_socket_nuevo);
+			gestion_de_los_mensajes();
 			break;
 		}
 		else {
@@ -129,14 +112,33 @@ int callback(void *NotUsed, int argc, char **argv, char **azColName) {
 
 	return 0;
 }
+void logear_en_db()
+{
+	char* err_msg;
+
+	time_t t;   // not a primitive datatype
+	time(&t);
+
+	char sql[128]; 
+	sprintf(sql,"INSERT INTO LOG  VALUES('%s','%s')",tipo,ctime(&t));
+	int rc = sqlite3_exec(obtener_conexion(), sql, callback, 0, &err_msg);
+
+	if (rc != SQLITE_OK ) {
+		strcpy(mensaje,err_msg);
+	}
+
+}
 
 int rutina_sql(char* buffer)
 {
 	char* err_msg;
+
+	if(tipo[0] == 'B'){
+		logear_en_db();
+	}
+
 	mensaje = malloc(long_buffer);
 	int rc = sqlite3_exec(obtener_conexion(), buffer, callback, 0, &err_msg);
-
-	printf("%s\n",mensaje);
 
 	if (rc != SQLITE_OK ) {
 		strcpy(mensaje,err_msg);
@@ -150,9 +152,143 @@ int rutina_sql(char* buffer)
 
 	if (cantidad_de_bits <= 0) {
 		close(fd_socket_nuevo);
-
 		return EXIT_FAILURE;
 	}
 	free(mensaje);
 	return EXIT_SUCCESS;
+}
+
+void handshake(long unsigned int long_buffer, char tipo[])
+{
+	long int cantidad_de_bits;
+	char handshake[16];
+	memset(handshake, '\0', 16);
+	sprintf(handshake, "%lu", long_buffer);
+
+	cantidad_de_bits = send(fd_socket_nuevo, handshake, strlen(handshake), 0);
+
+	if ( cantidad_de_bits < 0 ) {
+		perror( "fallo en handshake" );
+		return;	
+	}
+	else if (cantidad_de_bits == 0) {
+		close(fd_socket_nuevo);
+		printf( "PROCESO %d. termino la ejecución.\n\n", 
+				getpid() );
+		return;
+	}
+
+	cantidad_de_bits = recv(fd_socket_nuevo, tipo, 1 ,0);
+
+	if ( cantidad_de_bits < 0 ) {
+		perror( "escritura de socket" );
+		close(fd_socket_nuevo);
+		exit( 1 );
+	}
+	else if (cantidad_de_bits == 0) {
+		printf("Server out");
+		close(fd_socket_nuevo);
+		exit(0);
+	}
+}
+
+void para_Cliente_AB()
+{
+	long int cantidad_de_bits;
+	char buffer[long_buffer];
+	while ( 1 )
+	{
+		memset(buffer, '\0', long_buffer);
+
+		cantidad_de_bits = recv( fd_socket_nuevo, buffer, long_buffer,0);
+
+		if (cantidad_de_bits <= 0) {
+			close(fd_socket_nuevo);
+			printf( "PROCESO %d. termino la ejecución.\n\n", 
+					getpid() );
+			break;
+		}
+
+		rutina_sql(buffer);
+
+		sem_wait(*semaforo);
+		*ratio += cantidad_de_bits;
+		sem_post(*semaforo);
+	}
+}
+
+void para_Cliente_C()
+{
+	logear_en_db();
+
+	FILE *descarga;
+
+	if((descarga = fopen("./db/base_de_datos.db", "rb")) == NULL)
+	{
+		perror("Error abriendo la base de datos:");
+		exit(EXIT_FAILURE);
+	}
+
+	char buffer[long_buffer];
+
+	unsigned long hash;
+
+	hash = generar_hash_5381("./db/base_de_datos.db");
+
+	memset(buffer, '\0', long_buffer);
+	sprintf(buffer, "%lu", hash);
+
+	long int cantidad_de_bits = send( fd_socket_nuevo,
+			buffer, long_buffer ,0);
+	if (cantidad_de_bits <= 0) {
+		close(fd_socket_nuevo);
+		printf( "PROCESO %d. termino la ejecución.\n\n", 
+				getpid() );
+		exit(EXIT_FAILURE);
+
+		sem_wait(*semaforo);
+		*ratio += cantidad_de_bits;
+		sem_post(*semaforo);
+	}
+
+	while ( (buffer[0] =(char) fgetc ( descarga )) != EOF ) {
+		long int cantidad_de_bits = send( fd_socket_nuevo,
+				buffer, 1 ,0);
+
+		if (cantidad_de_bits <= 0) {
+			close(fd_socket_nuevo);
+			printf( "PROCESO %d. termino la ejecución.\n\n", 
+					getpid() );
+			exit(EXIT_FAILURE);
+
+
+			sem_wait(*semaforo);
+			*ratio += cantidad_de_bits;
+			sem_post(*semaforo);
+		}
+	}
+
+	fclose(descarga);
+}
+
+long unsigned generar_hash_5381(char* ruta)
+{
+	FILE *archivo;
+
+	if((archivo = fopen(ruta, "rb")) == NULL)
+	{
+		perror("Error abriendo la base de datos:");
+		exit(EXIT_FAILURE);
+	}
+
+
+	char buffer[1];
+
+	unsigned long hash = 5381;
+
+	while ( (buffer[0] =(char) fgetc ( archivo )) != EOF ) {
+		hash = ((hash << 5) + hash) +(unsigned long) buffer[0]; /* hash * 33 + c */
+	}
+	fclose(archivo);
+	return hash;
 }

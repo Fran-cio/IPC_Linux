@@ -14,7 +14,6 @@ void generarbasededatos()
 {
 	db = ( sqlite3** )mmap(NULL, sizeof(db) * CONEXIONES, 
 								PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-	printf("%lu \n",sizeof(db));
 
 	if(db == MAP_FAILED)
 	{
@@ -25,7 +24,8 @@ void generarbasededatos()
 	for (int i=0; i<CONEXIONES; i++) 
 	{
 		db[i] = NULL;
-		rc = sqlite3_open_v2("./db/base_de_datos.db", &(db[i]), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, NULL);
+		rc = sqlite3_open_v2("./db/base_de_datos.db", &(db[i]),
+				SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, NULL);
 		if (rc != SQLITE_OK) 
 		{
 			fprintf(stderr, "No se pudo abir la base de datos %d: %s\n",
@@ -46,6 +46,6 @@ void cerra_conexiones(int numero)
 }
 
 sqlite3* obtener_conexion(){
-	return db[(int)rand()%5];
+	return db[(int)rand()%CONEXIONES];
 }
 

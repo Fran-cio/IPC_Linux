@@ -180,16 +180,16 @@ void looger(void){
 		exit(EXIT_FAILURE);
 	}
 	char* formato = "\r===========================================================\n\
-									 \ripv4: %lu MB/s\n\
-									 \ripv6: %lu MB/s\n\
-									 \runix: %lu MB/s\n\
-									 \rtotal:%lu MB/s\n\
+									 \ripv4: %lu KBits/s\n\
+									 \ripv6: %lu KBits/s\n\
+									 \runix: %lu KBits/s\n\
+									 \rtotal:%lu KBits/s\n\
 									 \r===========================================================\n";
 
 	while ( esta_corriendo ) {
-		ipv4 = estrucura_prot->ipv4/1000000;
-		ipv6 = estrucura_prot->ipv6/1000000;
-		uni = estrucura_prot->uni/1000000;
+		ipv4 = estrucura_prot->ipv4*8/1000;
+		ipv6 = estrucura_prot->ipv6*8/1000;
+		uni = estrucura_prot->uni*8/1000;
 		
 		total = ipv4 + ipv6 +uni;
 		fprintf(log,formato,ipv4, ipv6, uni, total);

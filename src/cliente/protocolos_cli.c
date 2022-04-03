@@ -32,26 +32,22 @@ void asignar_tipo_cliente(char* tipo)
 {
 	if(!strcmp(tipo, "A"))
 	{
-		/*funcion = &cliente_A;*/
-		printf("build");
-		exit(0);
+		mensajes_cli = &cliente_A;
 	}
 	else if(!strcmp(tipo, "B"))
 	{
-		funcion = &cliente_B;
+		mensajes_cli = &cliente_B;
 	}
 	else if(!strcmp(tipo, "C"))
 	{
-		/*funcion = &cliente_C;*/
-		printf("build");
-		exit(0);
+		mensajes_cli = &cliente_C;
 	}
 	else
 	{
 		fprintf(stderr, "Ingrese un tipo de cliente valido: %s",tipo);
 		exit(EXIT_FAILURE);
 	}
-	printf("Tipo de cliente asignado: %s",tipo);
+	printf("Tipo de cliente asignado: %s\n",tipo);
 }
 
 void unix_cli(char* archivo) 
