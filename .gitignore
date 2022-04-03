@@ -3,7 +3,7 @@
 *.out
 *.a
 server
-cliente
+client
 *.txt
 node_modules
 *.json
