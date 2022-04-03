@@ -94,7 +94,6 @@ void ipv4_cli(char* host,short unsigned int puerto){
 	}
 	serv_addr.sin_port = htons( puerto );
 
-
 	if ( connect( sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr) ) < 0 ) {
 		perror( "conexión" );
 		exit( EXIT_FAILURE );
