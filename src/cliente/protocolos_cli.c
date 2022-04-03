@@ -28,6 +28,32 @@ int socket_perror(int __domain, int __type, int __protocol)
 	return fd_s;
 }
 
+void asignar_tipo_cliente(char* tipo)
+{
+	if(!strcmp(tipo, "A"))
+	{
+		/*funcion = &cliente_A;*/
+		printf("build");
+		exit(0);
+	}
+	else if(!strcmp(tipo, "B"))
+	{
+		funcion = &cliente_B;
+	}
+	else if(!strcmp(tipo, "C"))
+	{
+		/*funcion = &cliente_C;*/
+		printf("build");
+		exit(0);
+	}
+	else
+	{
+		fprintf(stderr, "Ingrese un tipo de cliente valido: %s",tipo);
+		exit(EXIT_FAILURE);
+	}
+	printf("Tipo de cliente asignado: %s",tipo);
+}
+
 void unix_cli(char* archivo) 
 {
 	struct sockaddr_un serv_addr;
@@ -73,7 +99,6 @@ void ipv4_cli(char* host,short unsigned int puerto){
 		perror( "conexión" );
 		exit( EXIT_FAILURE );
 	}	
-	funcion = &cliente_A;
 	mensajes_cli();
 }
 

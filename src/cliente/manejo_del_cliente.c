@@ -16,9 +16,8 @@ void mensajes_cli(void){
 	funcion();	
 }
 
-void cliente_A()
+void cliente_B()
 {
-
 	long int cantidad_de_bits;
 	char handshake[16];
 	cantidad_de_bits = recv(sockfd, handshake, sizeof(handshake),0);

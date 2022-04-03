@@ -4,7 +4,7 @@ CFLAGS=-Wall -pedantic -Werror -Wextra -Wconversion -std=gnu11
 PATHh=./include/
 PATHrec=./src/
 PATHrecser=./src/servidor/
-PATHreccli=./src/client/
+PATHreccli=./src/cliente/
 PATHout=./out/
 PATHlib=./lib/
 PATHbin=./bin/
