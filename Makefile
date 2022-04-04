@@ -48,7 +48,7 @@ $(PATHout)server.o: $(PATHrecser)server.c
 	$(CC) $(CFLAGS) -c $(PATHrecser)server.c
 	mv ./server.o $(PATHout)/server.o
 
-$(PATHout)protocolos.o: $(PATHrecser)protocolos.c $(PATHrecser)manejo_del_server.c $(PATHrecser)base_de_datos.c   
+$(PATHout)protocolos.o: $(PATHrecser)protocolos.c $(PATHrecser)manejo_del_server.c $(PATHrecser)base_de_datos.c $(PATHrec)utils.c   
 	mkdir -p $(PATHout)
 	$(CC) $(CFLAGS) -c $(PATHrecser)protocolos.c -lsqlite3 -std=gnu99
 	mv ./protocolos.o $(PATHout)
@@ -58,7 +58,7 @@ $(PATHout)cliente.o: $(PATHreccli)cliente.c
 	$(CC) $(CFLAGS) -c $(PATHreccli)cliente.c 
 	mv ./cliente.o $(PATHout)
 
-$(PATHout)protocolos_cli.o: $(PATHreccli)protocolos_cli.c $(PATHreccli)manejo_del_cliente.c   $(PATHrecser)base_de_datos.c
+$(PATHout)protocolos_cli.o: $(PATHreccli)protocolos_cli.c $(PATHreccli)manejo_del_cliente.c   $(PATHrecser)base_de_datos.c $(PATHrec)utils.c
 	mkdir -p $(PATHout)
 	$(CC) $(CFLAGS) -c $(PATHreccli)protocolos_cli.c 
 	mv ./protocolos_cli.o $(PATHout)

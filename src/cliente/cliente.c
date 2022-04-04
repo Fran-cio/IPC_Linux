@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "./protocolos_cli.c"
+
+#include "../../include/cliente/protocolos_cli.h"
 
 void salida_error(char*);
 

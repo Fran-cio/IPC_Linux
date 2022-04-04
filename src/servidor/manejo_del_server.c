@@ -1,4 +1,5 @@
 #include "base_de_datos.c"
+#include "../utils.c"
 
 #include <semaphore.h>
 #include <signal.h>
@@ -10,8 +11,6 @@
 #include <sys/prctl.h>
 #include <unistd.h>
 #include<time.h>
-
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 int	fd_socket
 		,fd_socket_nuevo;
@@ -35,17 +34,6 @@ void handshake(long unsigned int , char[]);
 void logear_en_db();
 void para_Cliente_AB();
 void para_Cliente_C();
-long unsigned generar_hash_5381(char* ruta);
-
-
-pid_t fork_con_errno(void){
-	pid_t fd = fork();
-	if(fd == -1){
-		perror("Fallo en el fork");
-		exit(EXIT_FAILURE);
-	}
-	return fd;
-}
 
 /*
  * Los mensajes se almacenan en un buffer con el tamaño pasado como parametro
@@ -269,26 +257,4 @@ void para_Cliente_C()
 	}
 
 	fclose(descarga);
-}
-
-long unsigned generar_hash_5381(char* ruta)
-{
-	FILE *archivo;
-
-	if((archivo = fopen(ruta, "rb")) == NULL)
-	{
-		perror("Error abriendo la base de datos:");
-		exit(EXIT_FAILURE);
-	}
-
-
-	char buffer[1];
-
-	unsigned long hash = 5381;
-
-	while ( (buffer[0] =(char) fgetc ( archivo )) != EOF ) {
-		hash = ((hash << 5) + hash) +(unsigned long) buffer[0]; /* hash * 33 + c */
-	}
-	fclose(archivo);
-	return hash;
 }

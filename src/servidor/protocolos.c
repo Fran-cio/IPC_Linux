@@ -6,6 +6,7 @@
 #include <sys/shm.h>
 #include <sys/un.h>
 #include <unistd.h>
+
 #include "../../include/servidor/estructura_protocolo.h"
 #include "./manejo_del_server.c"
 
@@ -13,23 +14,6 @@ int puerto
 		,esta_corriendo;
 
 Protocolos *estrucura_prot; 
-
-int socket_perror(int __domain, int __type, int __protocol){
-	int fd_s = socket( __domain, __type, __protocol);
-	int flag = 1;
-
-	if(fd_s <0){
-		perror("Socket Error");
-		exit(EXIT_FAILURE);
-	}
-
-	if(setsockopt(fd_s, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag)) == -1) {
-		perror("Setsockopt error");
-		exit(EXIT_FAILURE);
-	}
-
-	return fd_s;
-}
 
 void asignar_segmento(void){
 	estrucura_prot = (Protocolos *)mmap(NULL, sizeof(Protocolos), 

@@ -16,18 +16,6 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 
-int socket_perror(int __domain, int __type, int __protocol)
-{
-	int fd_s = socket( __domain, __type, __protocol);
-
-	if(fd_s <0){
-		perror("Socket Error");
-		exit(1);
-	}
-
-	return fd_s;
-}
-
 void asignar_tipo_cliente(char* tipo)
 {
 	if(!strcmp(tipo, "A"))
@@ -77,7 +65,8 @@ void unix_cli(char* archivo)
 	mensajes_cli();
 }
 
-void ipv4_cli(char* host,short unsigned int puerto){
+void ipv4_cli(char* host,short unsigned int puerto)
+{
 	struct sockaddr_in serv_addr;
 
 	sockfd = socket_perror( AF_INET, SOCK_STREAM, 0 );
@@ -97,7 +86,8 @@ void ipv4_cli(char* host,short unsigned int puerto){
 	mensajes_cli();
 }
 
-void ipv6_cli(char* host,short unsigned int puerto){
+void ipv6_cli(char* host,short unsigned int puerto)
+{
 	struct sockaddr_in6 serv_addr;
 
 	sockfd = socket_perror( AF_INET6, SOCK_STREAM,0);

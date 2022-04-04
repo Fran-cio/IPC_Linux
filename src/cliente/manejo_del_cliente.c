@@ -1,12 +1,12 @@
 #include "sys/socket.h"
 
+#include "../utils.c"
+
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 int sockfd;
 
@@ -15,7 +15,6 @@ long unsigned int servlen;
 void (*mensajes_cli)() = NULL;
 
 long unsigned int handshake_cliente(char);
-long unsigned generar_hash_5381(char* ruta);
 
 void cliente_C()
 {
@@ -31,7 +30,9 @@ void cliente_C()
 		exit(EXIT_FAILURE);
 	}
 
-	unsigned long hash,hash_recibido;
+	unsigned long long hash,hash_recibido;
+
+	memset(buffer, '\0', long_buffer);
 	
 	cantidad_de_bits = recv( sockfd, buffer, long_buffer,0 );
 
@@ -46,7 +47,7 @@ void cliente_C()
 		exit(0);
 	}
 	
-	hash_recibido = (unsigned long)atol(buffer);
+	hash_recibido = strtoull(buffer, NULL, 10); 
 
 	while((cantidad_de_bits = recv( sockfd, buffer, 1 ,0 )) > 0)
 	{
@@ -56,7 +57,7 @@ void cliente_C()
 	fclose(descarga);
 
 	hash = generar_hash_5381("./db/base_de_datos_descargado.db");
-	printf("Hash recibido: %lu\nHash generado: %lu\n",hash_recibido,hash);
+	printf("Hash recibido: %llu\nHash generado: %llu\n",hash_recibido,hash);
 	if (hash == hash_recibido) {
 		printf("Archivo descargado con exito\n");
 	}
@@ -184,26 +185,4 @@ long unsigned int handshake_cliente(char tipo)
 	}
 
 	return long_buffer;
-}
-
-long unsigned generar_hash_5381(char* ruta)
-{
-	FILE *archivo;
-
-	if((archivo = fopen(ruta, "rb")) == NULL)
-	{
-		perror("Error abriendo la base de datos:");
-		exit(EXIT_FAILURE);
-	}
-
-
-	char buffer[1];
-
-	unsigned long hash = 5381;
-
-	while ( (buffer[0] =(char) fgetc ( archivo )) != EOF ) {
-			hash = ((hash << 5) + hash) + (unsigned long)buffer[0]; /* hash * 33 + c */
-	}
-	fclose(archivo);
-	return hash;
 }
