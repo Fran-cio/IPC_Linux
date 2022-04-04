@@ -16,7 +16,11 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 
-void asignar_tipo_cliente(char* tipo)
+/*
+ * Segun el tipo de cliente se le asigna un metodo u otro.
+ */
+
+int asignar_tipo_cliente(char* tipo)
 {
 	if(!strcmp(tipo, "A"))
 	{
@@ -33,9 +37,10 @@ void asignar_tipo_cliente(char* tipo)
 	else
 	{
 		fprintf(stderr, "Ingrese un tipo de cliente valido: %s",tipo);
-		exit(EXIT_FAILURE);
+		return 0;
 	}
 	printf("Tipo de cliente asignado: %s\n",tipo);
+	return 1;
 }
 
 void unix_cli(char* archivo) 
