@@ -98,7 +98,6 @@ int callback(void *NotUsed, int argc, char **argv, char **azColName) {
 
 	for (unsigned int i = 0; (int)i < argc; i++) {
 		sprintf(columna,"%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-		printf("%lu %s",(strlen(mensaje)+strlen(columna)),columna);
 
 		mensaje = realloc_char_perror(mensaje,strlen(mensaje)+strlen(columna));
 
