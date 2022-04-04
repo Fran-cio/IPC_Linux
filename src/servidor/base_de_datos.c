@@ -10,6 +10,15 @@ sqlite3 **db;
 
 void cerra_conexiones(int);
 
+/*
+ * Se genenera un arreglo de conexiones a la base de datos, y genera un
+ * espacio de memoria compartido, y se conectan cada uno al archivo en la
+ * carpeta db.
+ *
+ * La base de configura con el parametro full mutex, de tal forma que no
+ * se generen corrupcion en los datos que se escriban o lean.
+ */
+
 void generarbasededatos()
 {
 	db = ( sqlite3** )mmap(NULL, sizeof(db) * CONEXIONES, 
@@ -44,6 +53,11 @@ void cerra_conexiones(int numero)
 		sqlite3_close(db[i]);
 	}
 }
+
+/*
+ * La politica del pool de conexiones es un simple random que devuelve una
+ * de las conexiones
+ */
 
 sqlite3* obtener_conexion(){
 	return db[(int)rand()%CONEXIONES];

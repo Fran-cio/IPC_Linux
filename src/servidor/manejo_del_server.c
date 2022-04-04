@@ -15,14 +15,13 @@
 int	fd_socket
 		,fd_socket_nuevo;
 
-long unsigned int long_buffer,
-		 					long_serv,
+long unsigned int	long_serv,
 							long_cli;
 
 char *protocolo, *mensaje;
 char tipo[1];	
 
-long *ratio;
+long unsigned *ratio;
 
 sem_t** semaforo;
 
@@ -30,7 +29,7 @@ struct timeval stop, start;
 
 int callback(void *NotUsed, int argc, char **argv, char **azColName);
 int rutina_sql(char* buffer);
-void handshake(long unsigned int , char[]);
+void handshake_tipo_server(char[]);
 void logear_en_db();
 void para_Cliente_AB();
 void para_Cliente_C();
@@ -44,7 +43,7 @@ void gestion_de_los_mensajes()
 {
 	close( fd_socket );
 
-	handshake(long_buffer, tipo);
+	handshake_tipo_server(tipo);
 
 	printf("El tipo de cliente conectado es: %s\n",tipo);
 
@@ -83,23 +82,39 @@ void recibir_mensajes(struct sockaddr* direccion_cli)
 	}
 }
 
+/*
+ * Esta funcion es llamada en cada lectura de la base de datos, simplemente
+ * se genera un string que se concatena con uno mas grande el cual se va 
+ * a devolver atravez de la base de datos.
+ */
+
 int callback(void *NotUsed, int argc, char **argv, char **azColName) {
 	NotUsed = 0;
 	NotUsed = NotUsed;
 
 	char *columna;
 
-	columna = malloc(long_buffer);
+	columna = malloc(512);
 
-	for (int i = 0; i < argc; i++) {
+	for (unsigned int i = 0; (int)i < argc; i++) {
 		sprintf(columna,"%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+
+		mensaje = realloc_char_perror(mensaje,strlen(mensaje)+strlen(columna));
+
 		mensaje = strcat(mensaje, columna);	
+
 	}
 
 	free(columna);
 
 	return 0;
 }
+
+/*
+ * Parte de la consigan pedia logear en la base, las query que haga los cliente
+ * de tipo C y B. Se guarda el tipo y la hora.
+ */
+
 void logear_en_db()
 {
 	char* err_msg;
@@ -125,7 +140,8 @@ int rutina_sql(char* buffer)
 		logear_en_db();
 	}
 
-	mensaje = malloc(long_buffer);
+	mensaje = malloc(128);
+	memset(mensaje, '\0', 128);
 	int rc = sqlite3_exec(obtener_conexion(), buffer, callback, 0, &err_msg);
 
 	if (rc != SQLITE_OK ) {
@@ -136,7 +152,9 @@ int rutina_sql(char* buffer)
 		mensaje[0] = ' '; 
 	}
 
-	long int cantidad_de_bits = send(fd_socket_nuevo, mensaje, long_buffer, 0);
+	handshake_send_tam_buffer(strlen(mensaje),fd_socket_nuevo);
+
+	long int cantidad_de_bits = send(fd_socket_nuevo, mensaje, strlen(mensaje), 0);
 
 	if (cantidad_de_bits <= 0) {
 		close(fd_socket_nuevo);
@@ -146,25 +164,14 @@ int rutina_sql(char* buffer)
 	return EXIT_SUCCESS;
 }
 
-void handshake(long unsigned int long_buffer, char tipo[])
+/*
+ * El server le dice el tamanio del buffer que van a usar y se entera del tipo
+ * de cliente con quien esta tratando.
+ */
+
+void handshake_tipo_server(char tipo[])
 {
 	long int cantidad_de_bits;
-	char handshake[16];
-	memset(handshake, '\0', 16);
-	sprintf(handshake, "%lu", long_buffer);
-
-	cantidad_de_bits = send(fd_socket_nuevo, handshake, strlen(handshake), 0);
-
-	if ( cantidad_de_bits < 0 ) {
-		perror( "fallo en handshake" );
-		return;	
-	}
-	else if (cantidad_de_bits == 0) {
-		close(fd_socket_nuevo);
-		printf( "PROCESO %d. termino la ejecución.\n\n", 
-				getpid() );
-		return;
-	}
 
 	cantidad_de_bits = recv(fd_socket_nuevo, tipo, 1 ,0);
 
@@ -180,12 +187,21 @@ void handshake(long unsigned int long_buffer, char tipo[])
 	}
 }
 
+/*
+ * A los clientes A y B se los trata de igual manera
+ */
+
 void para_Cliente_AB()
 {
 	long int cantidad_de_bits;
-	char buffer[long_buffer];
+	long unsigned int long_buffer;
+	char *buffer = malloc(1);
 	while ( 1 )
 	{
+		long_buffer = handshake_recv_tam_buffer(fd_socket_nuevo);
+
+		buffer = realloc_char_perror(buffer, long_buffer);
+
 		memset(buffer, '\0', long_buffer);
 
 		cantidad_de_bits = recv( fd_socket_nuevo, buffer, long_buffer,0);
@@ -200,10 +216,14 @@ void para_Cliente_AB()
 		rutina_sql(buffer);
 
 		sem_wait(*semaforo);
-		*ratio += cantidad_de_bits;
+		*ratio += (unsigned long) cantidad_de_bits;
 		sem_post(*semaforo);
 	}
 }
+
+/*
+ * Al cliente C se le envia el checksum y el archivo a posterior
+ */
 
 void para_Cliente_C()
 {
@@ -217,17 +237,19 @@ void para_Cliente_C()
 		exit(EXIT_FAILURE);
 	}
 
-	char buffer[long_buffer];
+	char buffer[256];
 
-	unsigned long hash;
+	unsigned long long hash;
 
-	hash = generar_hash_5381("./db/base_de_datos.db");
+	hash = generar_hash_djb2("./db/base_de_datos.db");
 
-	memset(buffer, '\0', long_buffer);
-	sprintf(buffer, "%lu", hash);
+	memset(buffer, '\0', 256);
+	sprintf(buffer, "%llu", hash);
+
+	handshake_send_tam_buffer(strlen(buffer), fd_socket_nuevo);
 
 	long int cantidad_de_bits = send( fd_socket_nuevo,
-			buffer, long_buffer ,0);
+			buffer, strlen(buffer) ,0);
 	if (cantidad_de_bits <= 0) {
 		close(fd_socket_nuevo);
 		printf( "PROCESO %d. termino la ejecución.\n\n", 
@@ -235,7 +257,7 @@ void para_Cliente_C()
 		exit(EXIT_FAILURE);
 
 		sem_wait(*semaforo);
-		*ratio += cantidad_de_bits;
+		*ratio += (unsigned long)cantidad_de_bits;
 		sem_post(*semaforo);
 	}
 
@@ -249,9 +271,8 @@ void para_Cliente_C()
 					getpid() );
 			exit(EXIT_FAILURE);
 
-
 			sem_wait(*semaforo);
-			*ratio += cantidad_de_bits;
+			*ratio += (unsigned long)cantidad_de_bits;
 			sem_post(*semaforo);
 		}
 	}

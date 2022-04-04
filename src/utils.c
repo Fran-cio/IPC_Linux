@@ -1,11 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-long unsigned generar_hash_5381(char* ruta)
+/*
+ * Es una funcion Hash que saque de internet
+ */
+
+long unsigned generar_hash_djb2(char* ruta)
 {
 	FILE *archivo;
 
@@ -14,7 +19,6 @@ long unsigned generar_hash_5381(char* ruta)
 		perror("Error abriendo la base de datos:");
 		exit(EXIT_FAILURE);
 	}
-
 
 	char buffer[1];
 
@@ -51,4 +55,64 @@ int socket_perror(int __domain, int __type, int __protocol){
 	}
 
 	return fd_s;
+}
+
+long unsigned int handshake_recv_tam_buffer(int socketfd)
+{
+	long int cantidad_de_bits;
+	char *handshake = malloc(16);
+	memset(handshake, '\0', 16);
+	char buffer[1];
+	while((cantidad_de_bits = recv( socketfd, buffer, 1 ,0 )) > 0)
+	{
+		if(buffer[0] == ' ') break;
+		handshake = strcat(handshake, buffer);
+	}
+
+	if ( cantidad_de_bits < 0 ) {
+		perror( "escritura de socket" );
+		close(socketfd);
+		exit( 1 );
+	}
+	else if (cantidad_de_bits == 0) {
+		printf("fallo al recibir handshake");
+		close(socketfd);
+		exit(0);
+	}
+
+	long unsigned int long_buffer = (long unsigned int)atol(handshake);
+
+	return long_buffer;
+}
+
+void handshake_send_tam_buffer(long unsigned int long_buffer,int socketfd)
+{
+	long int cantidad_de_bits;
+	char handshake[16];
+
+	memset(handshake, '\0', 16);
+	sprintf(handshake, "%lu ", long_buffer);
+
+	cantidad_de_bits = send(socketfd, handshake, strlen(handshake), 0);
+
+	if ( cantidad_de_bits < 0 ) {
+		perror( "fallo en enviar handshake" );
+		return;	
+	}
+	else if (cantidad_de_bits == 0) {
+		close(socketfd);
+		printf( "PROCESO %d. termino la ejecución.\n\n", 
+				getpid() );
+		return;
+	}
+}
+char* realloc_char_perror(char* mensaje, long unsigned int tam_nuevo)
+{
+	char *p = realloc(mensaje, tam_nuevo+1);
+	if (!p) {
+		perror("realloc fallo");
+		exit(EXIT_FAILURE);
+	} else {
+		return p;
+	}
 }
