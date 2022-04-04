@@ -10,14 +10,14 @@ int main( int argc, char *argv[] ) {
 	/*
 	 * Nos aseguramos que los valores obtenidos sean el numero correcto
 	 */
-	if ( argc < 5 ) {
+	if ( argc < 4 ) {
 		fprintf( stderr, 
-				"Ingrese: %s <archivo> <puerto ipv4> <puerto ipv6> <tamaño de buffer>\n",
+				"Ingrese: %s <archivo> <puerto ipv4> <puerto ipv6>\n",
 				argv[0] );
 		exit( EXIT_FAILURE );
 	}
 
-	iniciar_variables_globales(atoi(argv[4]));
+	iniciar_variables_globales();
 	/*
 	 * Cada protocolo se deriva a un proceso hijo que se va a encargar
 	 * individualmente de configurar cada parametro y posteriormente

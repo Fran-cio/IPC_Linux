@@ -35,11 +35,7 @@ void iniciar_semaforo()
 	*semaforo = sem_open("servidor", O_CREAT, 0, 1);
 }
 
-void iniciar_variables_globales(long unsigned int tam_buffer){
-	if (tam_buffer == 0) {
-		fprintf(stderr, "Tamaño de buffer invalido: %lu", tam_buffer);
-	}
-	long_buffer = tam_buffer;
+void iniciar_variables_globales(){
 	prctl(PR_SET_PDEATHSIG, SIGTERM);
 	asignar_segmento();
 	iniciar_semaforo();
@@ -151,10 +147,10 @@ void protocolo_unix(char * argv){
  * logearlos. Posteriormente se resetean los valores
  */
 void looger(void){
-	long ipv4,
-			 ipv6,
-			 uni,
-			 total;
+	long unsigned ipv4,
+			 					ipv6,
+								uni,
+								total;
 
 	esta_corriendo=1;
 	FILE* log;

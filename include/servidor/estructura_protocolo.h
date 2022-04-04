@@ -1,9 +1,9 @@
 #include <semaphore.h>
 
 typedef struct Protocolos{
-	long ipv4;
-  long ipv6;
-	long uni;
+	long unsigned ipv4;
+  long unsigned ipv6;
+	long unsigned uni;
 	sem_t *semaforo;
 }Protocolos;
 

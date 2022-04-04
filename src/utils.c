@@ -60,8 +60,14 @@ int socket_perror(int __domain, int __type, int __protocol){
 long unsigned int handshake_recv_tam_buffer(int socketfd)
 {
 	long int cantidad_de_bits;
-	char handshake[16];
-	cantidad_de_bits = recv(socketfd, handshake, sizeof(handshake),0);
+	char *handshake = malloc(16);
+	memset(handshake, '\0', 16);
+	char buffer[1];
+	while((cantidad_de_bits = recv( socketfd, buffer, 1 ,0 )) > 0)
+	{
+		if(buffer[0] == ' ') break;
+		handshake = strcat(handshake, buffer);
+	}
 
 	if ( cantidad_de_bits < 0 ) {
 		perror( "escritura de socket" );
@@ -69,13 +75,12 @@ long unsigned int handshake_recv_tam_buffer(int socketfd)
 		exit( 1 );
 	}
 	else if (cantidad_de_bits == 0) {
-		printf("Server out");
+		printf("fallo al recibir handshake");
 		close(socketfd);
 		exit(0);
 	}
 
 	long unsigned int long_buffer = (long unsigned int)atol(handshake);
-	printf("\nrecibe: %s, en numero: %lu\n",handshake,long_buffer);
 
 	return long_buffer;
 }
@@ -86,14 +91,12 @@ void handshake_send_tam_buffer(long unsigned int long_buffer,int socketfd)
 	char handshake[16];
 
 	memset(handshake, '\0', 16);
-	sprintf(handshake, "%lu              ", long_buffer);
+	sprintf(handshake, "%lu ", long_buffer);
 
 	cantidad_de_bits = send(socketfd, handshake, strlen(handshake), 0);
 
-	printf("\nmanda: %s\n",handshake);
-
 	if ( cantidad_de_bits < 0 ) {
-		perror( "fallo en handshake" );
+		perror( "fallo en enviar handshake" );
 		return;	
 	}
 	else if (cantidad_de_bits == 0) {
@@ -105,7 +108,7 @@ void handshake_send_tam_buffer(long unsigned int long_buffer,int socketfd)
 }
 char* realloc_char_perror(char* mensaje, long unsigned int tam_nuevo)
 {
-	char *p = realloc(mensaje, tam_nuevo);
+	char *p = realloc(mensaje, tam_nuevo+1);
 	if (!p) {
 		perror("realloc fallo");
 		exit(EXIT_FAILURE);

@@ -15,14 +15,13 @@
 int	fd_socket
 		,fd_socket_nuevo;
 
-long unsigned int long_buffer,
-		 					long_serv,
+long unsigned int	long_serv,
 							long_cli;
 
 char *protocolo, *mensaje;
 char tipo[1];	
 
-long *ratio;
+long unsigned *ratio;
 
 sem_t** semaforo;
 
@@ -101,7 +100,7 @@ int callback(void *NotUsed, int argc, char **argv, char **azColName) {
 		sprintf(columna,"%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
 		printf("%lu %s",(strlen(mensaje)+strlen(columna)),columna);
 
-		mensaje = realloc_char_perror(mensaje,strlen(mensaje)+strlen(columna)+1);
+		mensaje = realloc_char_perror(mensaje,strlen(mensaje)+strlen(columna));
 
 		mensaje = strcat(mensaje, columna);	
 
@@ -142,7 +141,8 @@ int rutina_sql(char* buffer)
 		logear_en_db();
 	}
 
-	mensaje = malloc(1);
+	mensaje = malloc(128);
+	memset(mensaje, '\0', 128);
 	int rc = sqlite3_exec(obtener_conexion(), buffer, callback, 0, &err_msg);
 
 	if (rc != SQLITE_OK ) {
@@ -153,7 +153,7 @@ int rutina_sql(char* buffer)
 		mensaje[0] = ' '; 
 	}
 
-	handshake_send_tam_buffer(strlen(mensaje)+1,fd_socket_nuevo);
+	handshake_send_tam_buffer(strlen(mensaje),fd_socket_nuevo);
 
 	long int cantidad_de_bits = send(fd_socket_nuevo, mensaje, strlen(mensaje), 0);
 
@@ -195,12 +195,13 @@ void handshake_tipo_server(char tipo[])
 void para_Cliente_AB()
 {
 	long int cantidad_de_bits;
+	long unsigned int long_buffer;
 	char *buffer = malloc(1);
 	while ( 1 )
 	{
 		long_buffer = handshake_recv_tam_buffer(fd_socket_nuevo);
 
-		buffer = realloc_char_perror(buffer, long_buffer+1);
+		buffer = realloc_char_perror(buffer, long_buffer);
 
 		memset(buffer, '\0', long_buffer);
 
@@ -216,7 +217,7 @@ void para_Cliente_AB()
 		rutina_sql(buffer);
 
 		sem_wait(*semaforo);
-		*ratio += cantidad_de_bits;
+		*ratio += (unsigned long) cantidad_de_bits;
 		sem_post(*semaforo);
 	}
 }
@@ -237,19 +238,19 @@ void para_Cliente_C()
 		exit(EXIT_FAILURE);
 	}
 
-	char buffer[long_buffer];
+	char buffer[256];
 
-	unsigned long hash;
+	unsigned long long hash;
 
 	hash = generar_hash_djb2("./db/base_de_datos.db");
 
-	memset(buffer, '\0', long_buffer);
-	sprintf(buffer, "%lu", hash);
+	memset(buffer, '\0', 256);
+	sprintf(buffer, "%llu", hash);
 
 	handshake_send_tam_buffer(strlen(buffer), fd_socket_nuevo);
 
 	long int cantidad_de_bits = send( fd_socket_nuevo,
-			buffer, long_buffer ,0);
+			buffer, strlen(buffer) ,0);
 	if (cantidad_de_bits <= 0) {
 		close(fd_socket_nuevo);
 		printf( "PROCESO %d. termino la ejecución.\n\n", 
@@ -257,7 +258,7 @@ void para_Cliente_C()
 		exit(EXIT_FAILURE);
 
 		sem_wait(*semaforo);
-		*ratio += cantidad_de_bits;
+		*ratio += (unsigned long)cantidad_de_bits;
 		sem_post(*semaforo);
 	}
 
@@ -271,9 +272,8 @@ void para_Cliente_C()
 					getpid() );
 			exit(EXIT_FAILURE);
 
-
 			sem_wait(*semaforo);
-			*ratio += cantidad_de_bits;
+			*ratio += (unsigned long)cantidad_de_bits;
 			sem_post(*semaforo);
 		}
 	}

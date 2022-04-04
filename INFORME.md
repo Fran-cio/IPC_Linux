@@ -42,6 +42,7 @@ Ademas, de esta forma es posible no tocar la base que es el TP1, ya que los prot
 ### Avisos
 La decision de que el archivo se envie byte a byte, es con el fin de evitar tener problemas con el tamanio de los buffers, desconozco las consecuencias de esta implementacion.
 Se implemento una funcion hash que se obtuvo de la siguiente [pagina](http://www.cse.yorku.ca/~oz/hash.html "Hash").
+La ultima implementacion usa asignacion dinamica. 
 ### Uso:
 El servidor y el cliente se pueden generar con el makefile haciendo uso de lo comandos `make server` o `make cliente` y para generar ambos `make all`.
 Los binarios, objectos, base de datos y librerias se guardan en los respectivos directorios asociados a los mismos.

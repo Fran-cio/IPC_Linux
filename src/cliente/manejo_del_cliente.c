@@ -38,7 +38,7 @@ void cliente_C()
 	unsigned long long hash,hash_recibido;
 
 	long_buffer = handshake_recv_tam_buffer(sockfd);
-	buffer = realloc_char_perror(buffer, long_buffer + 1);
+	buffer = realloc_char_perror(buffer, long_buffer);
 
 	memset(buffer, '\0', long_buffer);
 	
@@ -159,10 +159,10 @@ void cliente_A()
 		}
 
 		long_buffer = handshake_recv_tam_buffer(sockfd);
-		realloc_char_perror(buffer,long_buffer + 1);
+		buffer = realloc_char_perror(buffer,long_buffer);
 		memset(buffer,'\0',long_buffer);
 
-		cantidad_de_bits = recv( sockfd, buffer, long_buffer,0 );
+		cantidad_de_bits = recv( sockfd, buffer, long_buffer+1,0 );
 		if ( cantidad_de_bits < 0 ) {
 			perror( "escritura de socket" );
 			close(sockfd);
