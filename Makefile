@@ -68,10 +68,5 @@ $(PATHout)signals.o: $(PATHrec)signals.c
 	$(CC) $(CFLAGS) -c $(PATHrec)signals.c 
 	mv ./signals.o $(PATHout)
 
-$(PATHout)sqlite3.o: $(PATHrec)sqlite3.c  
-	mkdir -p $(PATHout)
-	$(CC) $(CFLAGS) -c $(PATHrec)signals.c 
-	mv ./signals.o $(PATHout)
-
 clean:
 	rm -f -d $(PATHlib)* $(PATHlib) $(PATHout)* $(PATHout) $(PATHbin)* $(PATHbin) ./log/* ./ipc/* ./log ./ipc 
