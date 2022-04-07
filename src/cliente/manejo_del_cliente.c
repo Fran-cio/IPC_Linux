@@ -44,12 +44,14 @@ void cliente_C()
 
   cantidad_de_bits = recv( sockfd, buffer, long_buffer,0 );
 
-  if ( cantidad_de_bits < 0 ) {
+  if ( cantidad_de_bits < 0 ) 
+  {
     perror( "escritura de socket" );
     close(sockfd);
     exit( 1 );
   }
-else if (cantidad_de_bits == 0) {
+  else if (cantidad_de_bits == 0) 
+  {
     printf("Server out");
     close(sockfd);
     exit(0);
@@ -69,7 +71,7 @@ else if (cantidad_de_bits == 0) {
   if (hash == hash_recibido) {
     printf("Archivo descargado con exito\n");
   }
-else
+  else
   {
     printf("Fallo en la descarga\n");
   }
@@ -102,7 +104,7 @@ void cliente_B()
       close(sockfd);
       exit( 1 );
     }
-  else if (cantidad_de_bits == 0) {
+    else if (cantidad_de_bits == 0) {
       printf("No Mande mas nada");
       close(sockfd);
       exit(0);
@@ -119,8 +121,7 @@ void cliente_B()
       perror( "escritura de socket" );
       close(sockfd);
       exit( 1 );
-    }
-  else if (cantidad_de_bits == 0) {
+    }else if (cantidad_de_bits == 0) {
       printf("Server out");
       close(sockfd);
       exit(0);
@@ -151,8 +152,7 @@ void cliente_A()
       perror( "escritura de socket" );
       close(sockfd);
       exit( 1 );
-    }
-  else if (cantidad_de_bits == 0) {
+    }  else if (cantidad_de_bits == 0) {
       printf("No Mande mas nada");
       close(sockfd);
       exit(0);
@@ -167,8 +167,7 @@ void cliente_A()
       perror( "escritura de socket" );
       close(sockfd);
       exit( 1 );
-    }
-  else if (cantidad_de_bits == 0) {
+    }  else if (cantidad_de_bits == 0) {
       printf("Server out");
       close(sockfd);
       exit(0);
@@ -197,8 +196,7 @@ void handshake_tipo_cliente(char tipo)
     perror( "escritura de socket" );
     close(sockfd);
     exit( 1 );
-  }
-else if (cantidad_de_bits == 0) {
+  } else if (cantidad_de_bits == 0) {
     printf("Server out");
     close(sockfd);
     exit(0);
