@@ -23,56 +23,56 @@ void handshake_tipo_cliente(char);
 
 void cliente_C()
 {
-	long int cantidad_de_bits;
-	long unsigned int long_buffer;
-	handshake_tipo_cliente('C');
+  long int cantidad_de_bits;
+  long unsigned int long_buffer;
+  handshake_tipo_cliente('C');
 
-	char *buffer = malloc(1);
-	FILE *descarga;
-	if((descarga = fopen("./db/base_de_datos_descargado.db", "wb")) == NULL)
-	{
-		perror("Error abriendo el punto de descarga:");
-		exit(EXIT_FAILURE);
-	}
+  char *buffer = malloc(1);
+  FILE *descarga;
+  if((descarga = fopen("./db/base_de_datos_descargado.db", "wb")) == NULL)
+  {
+    perror("Error abriendo el punto de descarga:");
+    exit(EXIT_FAILURE);
+  }
 
-	unsigned long long hash,hash_recibido;
+  unsigned long long hash,hash_recibido;
 
-	long_buffer = handshake_recv_tam_buffer(sockfd);
-	buffer = realloc_char_perror(buffer, long_buffer);
+  long_buffer = handshake_recv_tam_buffer(sockfd);
+  buffer = realloc_char_perror(buffer, long_buffer);
 
-	memset(buffer, '\0', long_buffer);
-	
-	cantidad_de_bits = recv( sockfd, buffer, long_buffer,0 );
+  memset(buffer, '\0', long_buffer);
 
-	if ( cantidad_de_bits < 0 ) {
-		perror( "escritura de socket" );
-		close(sockfd);
-		exit( 1 );
-	}
-	else if (cantidad_de_bits == 0) {
-		printf("Server out");
-		close(sockfd);
-		exit(0);
-	}
-	
-	hash_recibido = strtoull(buffer, NULL, 10); 
+  cantidad_de_bits = recv( sockfd, buffer, long_buffer,0 );
 
-	while((cantidad_de_bits = recv( sockfd, buffer, 1 ,0 )) > 0)
-	{
-		fputc ( buffer[0], descarga );
-	}
+  if ( cantidad_de_bits < 0 ) {
+    perror( "escritura de socket" );
+    close(sockfd);
+    exit( 1 );
+  }
+else if (cantidad_de_bits == 0) {
+    printf("Server out");
+    close(sockfd);
+    exit(0);
+  }
 
-	fclose(descarga);
+  hash_recibido = strtoull(buffer, NULL, 10); 
 
-	hash = generar_hash_djb2("./db/base_de_datos_descargado.db");
-	printf("Hash recibido: %llu\nHash generado: %llu\n",hash_recibido,hash);
-	if (hash == hash_recibido) {
-		printf("Archivo descargado con exito\n");
-	}
-	else
-	{
-		printf("Fallo en la descarga\n");
-	}
+  while((cantidad_de_bits = recv( sockfd, buffer, 1 ,0 )) > 0)
+    {
+      fputc ( buffer[0], descarga );
+    }
+
+  fclose(descarga);
+
+  hash = generar_hash_djb2("./db/base_de_datos_descargado.db");
+  printf("Hash recibido: %llu\nHash generado: %llu\n",hash_recibido,hash);
+  if (hash == hash_recibido) {
+    printf("Archivo descargado con exito\n");
+  }
+else
+  {
+    printf("Fallo en la descarga\n");
+  }
 }
 
 /*
@@ -82,51 +82,51 @@ void cliente_C()
 
 void cliente_B()
 {
-	long int cantidad_de_bits;
-	long unsigned int long_buffer;
-	handshake_tipo_cliente('B');
+  long int cantidad_de_bits;
+  long unsigned int long_buffer;
+  handshake_tipo_cliente('B');
 
-	char *buffer = malloc(1);
+  char *buffer = malloc(1);
 
-	while(1) {			 
-		buffer = realloc_char_perror(buffer, 512);
-		printf("sqlite3>");
-		fgets(buffer,512,stdin);
+  while(1) {			 
+    buffer = realloc_char_perror(buffer, 512);
+    printf("sqlite3>");
+    fgets(buffer,512,stdin);
 
-		handshake_send_tam_buffer(strlen(buffer)+1,sockfd);
+    handshake_send_tam_buffer(strlen(buffer)+1,sockfd);
 
-		cantidad_de_bits = send( sockfd, buffer, strlen(buffer),0 );
+    cantidad_de_bits = send( sockfd, buffer, strlen(buffer),0 );
 
-		if ( cantidad_de_bits < 0 ) {
-			perror( "escritura de socket" );
-			close(sockfd);
-			exit( 1 );
-		}
-		else if (cantidad_de_bits == 0) {
-			printf("No Mande mas nada");
-			close(sockfd);
-			exit(0);
-		}
+    if ( cantidad_de_bits < 0 ) {
+      perror( "escritura de socket" );
+      close(sockfd);
+      exit( 1 );
+    }
+  else if (cantidad_de_bits == 0) {
+      printf("No Mande mas nada");
+      close(sockfd);
+      exit(0);
+    }
 
-		long_buffer = handshake_recv_tam_buffer(sockfd);
+    long_buffer = handshake_recv_tam_buffer(sockfd);
 
-		buffer = realloc_char_perror(buffer,long_buffer);
+    buffer = realloc_char_perror(buffer,long_buffer);
 
-		memset(buffer,'\0',long_buffer);
+    memset(buffer,'\0',long_buffer);
 
-		cantidad_de_bits = recv( sockfd, buffer, long_buffer,0 );
-		if ( cantidad_de_bits < 0 ) {
-			perror( "escritura de socket" );
-			close(sockfd);
-			exit( 1 );
-		}
-		else if (cantidad_de_bits == 0) {
-			printf("Server out");
-			close(sockfd);
-			exit(0);
-		}
-		printf("%s\n",buffer);
-	}
+    cantidad_de_bits = recv( sockfd, buffer, long_buffer,0 );
+    if ( cantidad_de_bits < 0 ) {
+      perror( "escritura de socket" );
+      close(sockfd);
+      exit( 1 );
+    }
+  else if (cantidad_de_bits == 0) {
+      printf("Server out");
+      close(sockfd);
+      exit(0);
+    }
+    printf("%s\n",buffer);
+  }
 }
 
 /*
@@ -135,47 +135,47 @@ void cliente_B()
 
 void cliente_A()
 {
-	long int cantidad_de_bits;
-	long unsigned int long_buffer;
-	handshake_tipo_cliente('A');
+  long int cantidad_de_bits;
+  long unsigned int long_buffer;
+  handshake_tipo_cliente('A');
 
-	char *buffer = malloc(1);
-	char *query = "SELECT * FROM Log";
+  char *buffer = malloc(1);
+  char *query = "SELECT * FROM Log";
 
-	while(1) {			 
-		handshake_send_tam_buffer(strlen(query),sockfd);
+  while(1) {			 
+    handshake_send_tam_buffer(strlen(query),sockfd);
 
-		cantidad_de_bits = send( sockfd, query, strlen(query),0);
+    cantidad_de_bits = send( sockfd, query, strlen(query),0);
 
-		if ( cantidad_de_bits < 0 ) {
-			perror( "escritura de socket" );
-			close(sockfd);
-			exit( 1 );
-		}
-		else if (cantidad_de_bits == 0) {
-			printf("No Mande mas nada");
-			close(sockfd);
-			exit(0);
-		}
+    if ( cantidad_de_bits < 0 ) {
+      perror( "escritura de socket" );
+      close(sockfd);
+      exit( 1 );
+    }
+  else if (cantidad_de_bits == 0) {
+      printf("No Mande mas nada");
+      close(sockfd);
+      exit(0);
+    }
 
-		long_buffer = handshake_recv_tam_buffer(sockfd);
-		buffer = realloc_char_perror(buffer,long_buffer);
-		memset(buffer,'\0',long_buffer);
+    long_buffer = handshake_recv_tam_buffer(sockfd);
+    buffer = realloc_char_perror(buffer,long_buffer);
+    memset(buffer,'\0',long_buffer);
 
-		cantidad_de_bits = recv( sockfd, buffer, long_buffer+1,0 );
-		if ( cantidad_de_bits < 0 ) {
-			perror( "escritura de socket" );
-			close(sockfd);
-			exit( 1 );
-		}
-		else if (cantidad_de_bits == 0) {
-			printf("Server out");
-			close(sockfd);
-			exit(0);
-		}
-		printf("%s\n",buffer);
-		sleep(1);
-	}
+    cantidad_de_bits = recv( sockfd, buffer, long_buffer+1,0 );
+    if ( cantidad_de_bits < 0 ) {
+      perror( "escritura de socket" );
+      close(sockfd);
+      exit( 1 );
+    }
+  else if (cantidad_de_bits == 0) {
+      printf("Server out");
+      close(sockfd);
+      exit(0);
+    }
+    printf("%s\n",buffer);
+    sleep(1);
+  }
 }
 
 /* 
@@ -185,23 +185,23 @@ void cliente_A()
 
 void handshake_tipo_cliente(char tipo)
 {
-	long int cantidad_de_bits;	
+  long int cantidad_de_bits;	
 
-	char handshake[1];
+  char handshake[1];
 
-	handshake[0] = tipo;
+  handshake[0] = tipo;
 
-	cantidad_de_bits = send(sockfd, handshake, 1 ,0);
+  cantidad_de_bits = send(sockfd, handshake, 1 ,0);
 
-	if ( cantidad_de_bits < 0 ) {
-		perror( "escritura de socket" );
-		close(sockfd);
-		exit( 1 );
-	}
-	else if (cantidad_de_bits == 0) {
-		printf("Server out");
-		close(sockfd);
-		exit(0);
-	}
+  if ( cantidad_de_bits < 0 ) {
+    perror( "escritura de socket" );
+    close(sockfd);
+    exit( 1 );
+  }
+else if (cantidad_de_bits == 0) {
+    printf("Server out");
+    close(sockfd);
+    exit(0);
+  }
 }
 

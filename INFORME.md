@@ -1,4 +1,4 @@
-# Sistemas operativos 2 - Trabajo practico 2
+# Sistemas operativos 2-Trabajo practico 2
 ## Informe
 ### Configuranciones iniciales
 Se opto por ahcer un pool de conexiones con una base de datos.

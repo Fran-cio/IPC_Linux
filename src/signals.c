@@ -8,16 +8,16 @@
  */
 void set_func_sig(__sighandler_t func)
 {
-    signal(SIGINT,func);
-    signal(SIGTSTP,func);
-    signal(SIGQUIT,func);
+  signal(SIGINT,func);
+  signal(SIGTSTP,func);
+  signal(SIGQUIT,func);
 }
 
 void sigHandler(int signum){
-    int status;
-     switch(signum){
-        case SIGCHLD:
-             waitpid(-1, &status, WNOHANG);
-             break;
-     }
+  int status;
+  switch(signum){
+    case SIGCHLD:
+      waitpid(-1, &status, WNOHANG);
+      break;
+  }
 }
