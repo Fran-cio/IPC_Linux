@@ -173,7 +173,6 @@ void cliente_A()
       exit(0);
     }
     printf("%s\n",buffer);
-    sleep(1);
   }
 }
 
